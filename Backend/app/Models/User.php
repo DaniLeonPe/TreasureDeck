@@ -2,44 +2,62 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+/**
+ * @property integer $id
+ * @property string $name
+ * @property string $email
+ * @property string $password_hash
+ * @property string $role
+ * @property boolean $email_verified
+ * @property string $email_verification_token
+ * @property UserCard[] $userCards
+ * @property DecksCard[] $decksCards
+ * @property Deck[] $decks
+ */
+class User extends Authenticatable implements JWTSubject
 {
-    use HasApiTokens, HasFactory, Notifiable;
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+    public function getJWTCustomClaims()
+    {
+        //lo que pongamos en este array se agrega al tokey
+        return [
+            'rol' => $this->role,
+            'name' => $this->name
+        ];
+    }
+    /**
+     * @var array
+     */
+    protected $fillable = ['name', 'email', 'password_hash', 'role', 'email_verified', 'email_verification_token'];
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    public function userCards()
+    {
+        return $this->hasMany('App\Models\UserCard');
+    }
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    public function decksCards()
+    {
+        return $this->hasMany('App\Models\DecksCard');
+    }
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+    public function decks()
+    {
+        return $this->hasMany('App\Models\Deck');
+    }
 }
