@@ -1,0 +1,2033 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "TreasureDeck API",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Registrar usuario",
+                "description": "Registra un nuevo usuario y envía correo para verificar su email.",
+                "operationId": "392091b67067bb84702403a281d29dff",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Juan Pérez"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "juan@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuario registrado. Verifica tu correo antes de iniciar sesión.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario registrado. Verifica tu correo antes de iniciar sesión."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validación fallida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Iniciar sesión",
+                "description": "Permite iniciar sesión si el usuario está registrado y el correo verificado.",
+                "operationId": "31dd365bddb46a996c2350b0a1fb7381",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Juan Pérez"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token JWT generado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Credenciales incorrectas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Credenciales incorrectas"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Correo no verificado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Debes verificar tu correo antes de iniciar sesión"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/cards": {
+            "get": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Get list of cards with pagination",
+                "operationId": "f7f1f6cc231245966f15aba5ffad75d8",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of cards",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CardDTO"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Crear una nueva carta",
+                "operationId": "76b0337a9b2a3cb1c4147c865a893535",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "collector_number",
+                                    "rarity",
+                                    "expansion_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Black Lotus"
+                                    },
+                                    "collector_number": {
+                                        "type": "string",
+                                        "example": "001"
+                                    },
+                                    "rarity": {
+                                        "type": "string",
+                                        "example": "Mythic"
+                                    },
+                                    "expansion_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Carta creada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CardDTO"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Datos de entrada inválidos"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/cards/{id}": {
+            "get": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Obtener una carta por ID",
+                "operationId": "a6f1ba9699e0fd1d7c87746ae19d2755",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la carta",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle de la carta",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CardDTO"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Carta no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Actualizar una carta por ID",
+                "operationId": "4de109c9240bbbedb3b42338c935af60",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la carta",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Black Lotus"
+                                    },
+                                    "collector_number": {
+                                        "type": "string",
+                                        "example": "001"
+                                    },
+                                    "rarity": {
+                                        "type": "string",
+                                        "example": "Mythic"
+                                    },
+                                    "expansion_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Carta actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CardDTO"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Carta no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Eliminar una carta por ID",
+                "operationId": "65409da63cd6eb9e9e0f960d82b0921b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la carta",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Carta eliminada exitosamente"
+                    },
+                    "404": {
+                        "description": "Carta no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/cardsVersion": {
+            "get": {
+                "tags": [
+                    "cardsVersions"
+                ],
+                "summary": "Obtener todas las versiones de las cartas",
+                "operationId": "c770bd4d82b86be5ea25f11bce008ed1",
+                "responses": {
+                    "200": {
+                        "description": "Lista de versiones de cartas"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "cardsVersions"
+                ],
+                "summary": "Crear una nueva versión de la carta",
+                "operationId": "19b28bac7941af9bfed7a04498b44323",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "card_id",
+                                    "image_url",
+                                    "min_price",
+                                    "avg_price"
+                                ],
+                                "properties": {
+                                    "card_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "image_url": {
+                                        "type": "string",
+                                        "format": "url",
+                                        "example": "https://example.com/card.png"
+                                    },
+                                    "min_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1.5
+                                    },
+                                    "avg_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 2.3
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Versión creada con éxito"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/cardsVersion/{id}": {
+            "get": {
+                "tags": [
+                    "cardsVersions"
+                ],
+                "summary": "Obtener una versión por ID",
+                "operationId": "bdffad542b87a1b9bb0e21e0c75856b0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la versión",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Versión encontrada"
+                    },
+                    "404": {
+                        "description": "Versión no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "cardsVersions"
+                ],
+                "summary": "Actualizar una versión de carta",
+                "operationId": "6261599c4dd1cd8c4f249adb699ce41b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la versión",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "image_url": {
+                                        "type": "string",
+                                        "format": "url",
+                                        "example": "https://example.com/card.png"
+                                    },
+                                    "min_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1.2
+                                    },
+                                    "avg_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 2.5
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Versión actualizada"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "cardsVersions"
+                ],
+                "summary": "Eliminar una versión de carta",
+                "operationId": "04c6a54fb9e86336ebfddbca652a173f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la versión",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Versión eliminada"
+                    },
+                    "404": {
+                        "description": "Versión no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/deckCards": {
+            "get": {
+                "tags": [
+                    "deckCards"
+                ],
+                "summary": "Listar todas las cartas en mazos",
+                "operationId": "cefb8f38e2f187a5304df054479dc709",
+                "responses": {
+                    "200": {
+                        "description": "Lista de cartas en mazos"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "deckCards"
+                ],
+                "summary": "Agregar una carta a un mazo",
+                "operationId": "5c345c84d0759bd10e2c9609d8b84ae9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "deck_id",
+                                    "card_version_id",
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "deck_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "card_version_id": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "example": 3
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Carta agregada al mazo"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/deckCards/{id}": {
+            "get": {
+                "tags": [
+                    "deckCards"
+                ],
+                "summary": "Mostrar una carta específica de un mazo",
+                "operationId": "fb243983a57840cea54aff4ce42a741d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la carta en el mazo",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Carta encontrada"
+                    },
+                    "404": {
+                        "description": "Carta no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "deckCards"
+                ],
+                "summary": "Actualizar una carta en el mazo",
+                "operationId": "99ed2ad841b1c958449df69ea22b368f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la carta en el mazo",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "quantity": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Carta actualizada"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "deckCards"
+                ],
+                "summary": "Eliminar una carta del mazo",
+                "operationId": "1b7721ae4f78243d89b810bd98fda0a7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la carta en el mazo",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Carta eliminada del mazo"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/decks": {
+            "get": {
+                "tags": [
+                    "decks"
+                ],
+                "summary": "Obtener todos los mazos",
+                "operationId": "451400fb3b00987faabe5b9c1321d75d",
+                "responses": {
+                    "200": {
+                        "description": "Lista de mazos"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "decks"
+                ],
+                "summary": "Crear un nuevo mazo",
+                "operationId": "8d0aaa138e28cfcef80c2ab993969829",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id",
+                                    "leader_card_version_id",
+                                    "name"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "leader_card_version_id": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Mazo Dragón"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Mazo creado con éxito"
+                    }
+                }
+            }
+        },
+        "/api/v2/decks/{id}": {
+            "get": {
+                "tags": [
+                    "decks"
+                ],
+                "summary": "Mostrar un mazo específico",
+                "operationId": "fe886e5aaba29a35389b14884333cf12",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del mazo",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Información del mazo"
+                    },
+                    "404": {
+                        "description": "Mazo no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "decks"
+                ],
+                "summary": "Actualizar un mazo existente",
+                "operationId": "394892566ba48a06de54ae59723ad430",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del mazo",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Mazo actualizado"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Mazo actualizado correctamente"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "decks"
+                ],
+                "summary": "Eliminar un mazo",
+                "operationId": "6c62659ee7b925a4c6170a8bb594446a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del mazo",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Mazo eliminado"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/deckStats": {
+            "get": {
+                "tags": [
+                    "deckStats"
+                ],
+                "summary": "Listar estadísticas de todos los mazos",
+                "operationId": "b2623e15859cf15372a737ad0576e6db",
+                "responses": {
+                    "200": {
+                        "description": "Lista de estadísticas"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "deckStats"
+                ],
+                "summary": "Crear estadísticas para un mazo",
+                "operationId": "8a2519d714d6d30aa3543121f3606ec0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "deck_id",
+                                    "wins",
+                                    "losses"
+                                ],
+                                "properties": {
+                                    "deck_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "wins": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "losses": {
+                                        "type": "integer",
+                                        "example": 5
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Estadística creada exitosamente"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/deckStats/{id}": {
+            "get": {
+                "tags": [
+                    "deckStats"
+                ],
+                "summary": "Mostrar estadísticas de un mazo por ID",
+                "operationId": "0260c9df348d41759a5c6e96fc5329c1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de las estadísticas del mazo",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Estadísticas del mazo"
+                    },
+                    "404": {
+                        "description": "No encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "deckStats"
+                ],
+                "summary": "Actualizar estadísticas de un mazo",
+                "operationId": "dc4494a6c662f8cfd88a944dabf7dd80",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de las estadísticas del mazo",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "wins": {
+                                        "type": "integer",
+                                        "example": 12
+                                    },
+                                    "losses": {
+                                        "type": "integer",
+                                        "example": 6
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Estadísticas actualizadas"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "deckStats"
+                ],
+                "summary": "Eliminar estadísticas de un mazo",
+                "operationId": "e9b6f2f0e5be20c212bcba745928df6a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de las estadísticas del mazo",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Estadísticas eliminadas"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/expansions": {
+            "get": {
+                "tags": [
+                    "expansions"
+                ],
+                "summary": "Listar todas las expansiones",
+                "operationId": "c2dbf6b8fb4b2ed7dc15135a6748c173",
+                "responses": {
+                    "200": {
+                        "description": "Lista de expansiones"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "expansions"
+                ],
+                "summary": "Crear una nueva expansión",
+                "operationId": "b5d3f86a79eedbe41c96965d32e1fdd0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Nombre de expansión"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Expansión creada con éxito"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/expansions/{id}": {
+            "get": {
+                "tags": [
+                    "expansions"
+                ],
+                "summary": "Obtener una expansión por ID",
+                "operationId": "9cd7f8843ee3b4aac7bf17374faad22b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la expansión",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles de la expansión"
+                    },
+                    "404": {
+                        "description": "Expansión no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "expansions"
+                ],
+                "summary": "Actualizar una expansión existente",
+                "operationId": "fa5d61b06cf37637b68722eb2823d57f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la expansión",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Nuevo nombre de expansión"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Expansión actualizada"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "expansions"
+                ],
+                "summary": "Eliminar una expansión",
+                "operationId": "b6580d9da6a66efc194b55bc04b73ed9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la expansión",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Expansión eliminada"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/role": {
+            "get": {
+                "tags": [
+                    "role"
+                ],
+                "summary": "Listar todos los role",
+                "operationId": "aeb1127751e6add756471343f2bd8033",
+                "responses": {
+                    "200": {
+                        "description": "Lista de role"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "role"
+                ],
+                "summary": "Crear un nuevo rol",
+                "operationId": "a03fec6c5318c865f5aa5b74ae62499b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Administrador"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Rol creado con éxito"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/role/{id}": {
+            "get": {
+                "tags": [
+                    "role"
+                ],
+                "summary": "Obtener un rol por ID",
+                "operationId": "8d9d9f64a47a83cf57ad159d6fba2555",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del rol",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles del rol"
+                    },
+                    "404": {
+                        "description": "Rol no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "role"
+                ],
+                "summary": "Actualizar un rol existente",
+                "operationId": "257b439759845bd011a4ed03a374bdaa",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del rol",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Editor"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Rol actualizado"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "role"
+                ],
+                "summary": "Eliminar un rol",
+                "operationId": "87192da30e7248b46bd4c95cc5dbc82e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del rol",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Rol eliminado con éxito"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/userCards": {
+            "get": {
+                "tags": [
+                    "userCards"
+                ],
+                "summary": "Listar todas las cartas de usuario",
+                "operationId": "8b771e8e1077d9d4ff134b0844b7ed1b",
+                "responses": {
+                    "200": {
+                        "description": "Lista de cartas de usuario"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "userCards"
+                ],
+                "summary": "Crear una carta de usuario",
+                "operationId": "20a1b39b22a06ea80076139808c7445a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id",
+                                    "card_version_id",
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "card_version_id": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "example": 3
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Carta de usuario creada"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/userCards/{id}": {
+            "get": {
+                "tags": [
+                    "userCards"
+                ],
+                "summary": "Obtener una carta de usuario por ID",
+                "operationId": "3d667a273fb1caba79193f43606ceca9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la carta de usuario",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Carta de usuario encontrada"
+                    },
+                    "404": {
+                        "description": "Carta de usuario no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "userCards"
+                ],
+                "summary": "Actualizar una carta de usuario",
+                "operationId": "a6ec24ad4914597117db42946c3372ad",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la carta de usuario",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "quantity": {
+                                        "type": "integer",
+                                        "example": 4
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Carta de usuario actualizada"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "userCards"
+                ],
+                "summary": "Eliminar una carta de usuario",
+                "operationId": "bd5bab4f761235155eeffbcbaac5e990",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la carta de usuario",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Carta de usuario eliminada"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/users": {
+            "get": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Listar todos los usuarios",
+                "operationId": "ceaab93750fcd0e013c39bdc328c6c71",
+                "responses": {
+                    "200": {
+                        "description": "Lista de usuarios"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Crear un nuevo usuario",
+                "operationId": "612ae6f0c706644774a9c4670ec8f547",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "role_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Juan Pérez"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "juan@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "secreto123"
+                                    },
+                                    "role_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuario creado exitosamente"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/users/{id}": {
+            "get": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Obtener un usuario por ID",
+                "operationId": "944505f80e4afb2ea121bf6f6d3e6487",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del usuario",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles del usuario"
+                    },
+                    "404": {
+                        "description": "Usuario no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Actualizar un usuario existente",
+                "operationId": "906244f9737719982b6d428184078a85",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del usuario",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Nombre actualizado"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "nuevo@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "nuevoclave123"
+                                    },
+                                    "role_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Usuario actualizado"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Eliminar un usuario",
+                "operationId": "dfe3d0ad627d909c2e47a0f0e33f5903",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del usuario",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Usuario eliminado"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "CardDTO": {
+                "title": "Card",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "collector_number": {
+                        "type": "string"
+                    },
+                    "rarity": {
+                        "type": "string"
+                    },
+                    "expansion_id": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "CardVersionDTO": {
+                "title": "CardVersion",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "card_id": {
+                        "type": "integer"
+                    },
+                    "versions": {
+                        "type": "string"
+                    },
+                    "image_url": {
+                        "type": "string"
+                    },
+                    "min_price": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "avg_price": {
+                        "type": "number",
+                        "format": "float"
+                    }
+                },
+                "type": "object"
+            },
+            "DeckCardDTO": {
+                "title": "DeckCard",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "deck_id": {
+                        "type": "integer"
+                    },
+                    "card_version_id": {
+                        "type": "integer"
+                    },
+                    "quantity": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "DeckDTO": {
+                "title": "Deck",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "user_id": {
+                        "type": "integer"
+                    },
+                    "leader_card_version_id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "DeckStatDTO": {
+                "title": "DeckStat",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "deck_id": {
+                        "type": "integer"
+                    },
+                    "wins": {
+                        "type": "integer"
+                    },
+                    "losses": {
+                        "type": "integer"
+                    },
+                    "dice": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "ExpansionDTO": {
+                "title": "Expansion",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "RoleDTO": {
+                "title": "Role",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "UserCardDTO": {
+                "title": "UserCard",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "user_id": {
+                        "type": "integer"
+                    },
+                    "card_version_id": {
+                        "type": "integer"
+                    },
+                    "quantity": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "UserDTO": {
+                "title": "User",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "role_id": {
+                        "type": "integer"
+                    },
+                    "email_verified_at": {
+                        "type": "boolean"
+                    },
+                    "email_verification_token": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "description": "Autenticación usando Bearer token",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Operaciones de autenticación y registro de usuarios"
+        },
+        {
+            "name": "Cards",
+            "description": "Operaciones relacionadas con cartas"
+        },
+        {
+            "name": "cardsVersions",
+            "description": "Operaciones relacionadas con las versiones de las cartas"
+        },
+        {
+            "name": "deckCards",
+            "description": "Operaciones relacionadas con las cartas dentro de mazos"
+        },
+        {
+            "name": "decks",
+            "description": "Operaciones relacionadas con los mazos"
+        },
+        {
+            "name": "deckStats",
+            "description": "Operaciones relacionadas con las estadísticas de los mazos"
+        },
+        {
+            "name": "expansions",
+            "description": "Operaciones relacionadas con las expansiones de cartas"
+        },
+        {
+            "name": "role",
+            "description": "Operaciones relacionadas con los role de usuario"
+        },
+        {
+            "name": "userCards",
+            "description": "Operaciones relacionadas con las cartas de usuario"
+        },
+        {
+            "name": "users",
+            "description": "Operaciones relacionadas con los usuarios"
+        }
+    ]
+}
