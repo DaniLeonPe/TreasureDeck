@@ -73,7 +73,7 @@ Con una cobertura de 88.21%
 
 ## Entidad relacion 
 
-![Diagrama](img/diagrama.png)
+![Diagrama](img/Diagrama.png)
 
 ## casos de uso
 
