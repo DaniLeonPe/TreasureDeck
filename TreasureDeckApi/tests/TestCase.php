@@ -16,6 +16,6 @@ abstract class TestCase extends BaseTestCase
 
         // Aquí pones el setup común, por ejemplo:
         $this->user = User::factory()->create();
-        $this->actingAs($this->user, 'sanctum');
+        $this->actingAs($this->user, 'api');
     }
 }

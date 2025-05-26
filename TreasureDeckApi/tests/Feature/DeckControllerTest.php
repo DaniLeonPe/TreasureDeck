@@ -12,24 +12,37 @@ class DeckControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected User $user;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Crear y autenticar usuario para los tests
+        $this->user = User::factory()->create();
+        $this->actingAs($this->user);
+    }
+
     public function test_it_lists_decks()
     {
-        Deck::factory()->count(3)->create();
+        // Crear decks para usuario autenticado
+        Deck::factory()->count(2)->create(['user_id' => $this->user->id]);
+
+        // Crear deck para otro usuario
+        Deck::factory()->create();
 
         $response = $this->getJson('/api/v2/decks');
 
+        // Solo debe listar los decks del usuario autenticado (2)
         $response->assertStatus(200)
-                 ->assertJsonCount(3, 'data');
+                 ->assertJsonCount(2, 'data');
     }
 
     public function test_it_creates_a_deck()
     {
-        $user = User::factory()->create();
         $cardVersion = CardsVersion::factory()->create();
 
         $payload = [
-            'user_id' => $user->id,
-            'leader_card_version_id' => $cardVersion->id,
             'name' => 'Mazo Dragón',
         ];
 
@@ -37,17 +50,16 @@ class DeckControllerTest extends TestCase
 
         $response->assertStatus(201)
                  ->assertJsonFragment([
-                     'user_id' => $user->id,
-                     'leader_card_version_id' => $cardVersion->id,
+                     'user_id' => $this->user->id,
                      'name' => 'Mazo Dragón',
                  ]);
 
-        $this->assertDatabaseHas('decks', $payload);
+        $this->assertDatabaseHas('decks', array_merge($payload, ['user_id' => $this->user->id]));
     }
 
     public function test_it_shows_a_deck()
     {
-        $deck = Deck::factory()->create();
+        $deck = Deck::factory()->create(['user_id' => $this->user->id]);
 
         $response = $this->getJson("/api/v2/decks/{$deck->id}");
 
@@ -60,7 +72,7 @@ class DeckControllerTest extends TestCase
 
     public function test_it_updates_a_deck()
     {
-        $deck = Deck::factory()->create();
+        $deck = Deck::factory()->create(['user_id' => $this->user->id]);
 
         $payload = [
             'name' => 'Mazo actualizado',
@@ -76,7 +88,7 @@ class DeckControllerTest extends TestCase
 
     public function test_it_deletes_a_deck()
     {
-        $deck = Deck::factory()->create();
+        $deck = Deck::factory()->create(['user_id' => $this->user->id]);
 
         $response = $this->deleteJson("/api/v2/decks/{$deck->id}");
 

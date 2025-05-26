@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('cards_versions', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->unsignedBigInteger('card_id');
-            $table->string('versions');
+            $table->string('versions')->nullable();
             $table->string('image_url');
             $table->decimal('min_price', 8,2);
             $table->decimal('avg_price', 8,2);

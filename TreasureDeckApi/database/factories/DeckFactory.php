@@ -18,8 +18,9 @@ class DeckFactory extends Factory
     {
         return [
             'user_id' => \App\Models\User::factory(),
-            'leader_card_version_id' => \App\Models\CardsVersion::factory(),
             'name' => $this->faker->word,
+            'wins'=> 0,
+            'losses'=>0
         ];
     }
 }

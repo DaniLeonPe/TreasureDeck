@@ -12,6 +12,8 @@ export default function LoginScreen({ navigation }: any) {
     try {
       const res = await axios.post(`${API_BASE_URL}/login`, { name, password });
       await AsyncStorage.setItem('token', res.data.token);
+      const savedToken = await AsyncStorage.getItem('token');
+console.log('Token guardado:', savedToken);
       navigation.replace('Home');
     } catch (error: any) {
       Alert.alert('Error', error.response?.data?.message || 'Error al iniciar sesión');

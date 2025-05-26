@@ -1,5 +1,4 @@
 <?php
-
 namespace Tests\Feature;
 
 use App\Models\CardsVersion;
@@ -12,23 +11,35 @@ class UserCardControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected User $user;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Crear y autenticar usuario para los tests
+        $this->user = User::factory()->create();
+        $this->actingAs($this->user);
+    }
+
     public function test_it_lists_user_cards()
     {
-        UserCard::factory()->count(3)->create();
+        // Crear user cards para el usuario autenticado y también para otro usuario
+        UserCard::factory()->count(2)->create(['user_id' => $this->user->id]);
+        UserCard::factory()->count(1)->create(); // otra user card para otro usuario
 
         $response = $this->getJson('/api/v2/userCards');
 
+        // Solo debe listar las que pertenecen al usuario autenticado (2)
         $response->assertStatus(200)
-                 ->assertJsonCount(3, 'data');
+                 ->assertJsonCount(2, 'data');
     }
 
     public function test_it_creates_a_user_card()
     {
-        $user = User::factory()->create();
         $cardVersion = CardsVersion::factory()->create();
 
         $payload = [
-            'user_id' => $user->id,
             'card_version_id' => $cardVersion->id,
             'quantity' => 5,
         ];
@@ -37,17 +48,17 @@ class UserCardControllerTest extends TestCase
 
         $response->assertStatus(201)
                  ->assertJsonFragment([
-                     'user_id' => $user->id,
+                     'user_id' => $this->user->id,
                      'card_version_id' => $cardVersion->id,
                      'quantity' => 5,
                  ]);
 
-        $this->assertDatabaseHas('user_cards', $payload);
+        $this->assertDatabaseHas('user_cards', array_merge($payload, ['user_id' => $this->user->id]));
     }
 
     public function test_it_shows_a_user_card()
     {
-        $userCard = UserCard::factory()->create();
+        $userCard = UserCard::factory()->create(['user_id' => $this->user->id]);
 
         $response = $this->getJson("/api/v2/userCards/{$userCard->id}");
 
@@ -60,7 +71,7 @@ class UserCardControllerTest extends TestCase
 
     public function test_it_updates_a_user_card()
     {
-        $userCard = UserCard::factory()->create(['quantity' => 2]);
+        $userCard = UserCard::factory()->create(['user_id' => $this->user->id, 'quantity' => 2]);
 
         $response = $this->putJson("/api/v2/userCards/{$userCard->id}", [
             'quantity' => 7,
@@ -77,7 +88,7 @@ class UserCardControllerTest extends TestCase
 
     public function test_it_deletes_a_user_card()
     {
-        $userCard = UserCard::factory()->create();
+        $userCard = UserCard::factory()->create(['user_id' => $this->user->id]);
 
         $response = $this->deleteJson("/api/v2/userCards/{$userCard->id}");
 

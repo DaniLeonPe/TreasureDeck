@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property int $id
  * @property int $user_id
- * @property int $leader_card_version_id
  * @property string $name
  * 
  * @property CardsVersion $cardsVersion
@@ -25,14 +24,14 @@ class Deck extends Model
     use HasFactory;
     public $timestamps = false;
 
-    protected $fillable = ['user_id', 'leader_card_version_id', 'name'];
+    protected $fillable = ['user_id', 'name', 'wins', 'losses'];
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function cardsVersion()
     {
-        return $this->belongsTo('App\Models\CardsVersion', 'leader_card_version_id');
+        return $this->belongsTo('App\Models\CardsVersion');
     }
 
     /**

@@ -27,9 +27,18 @@ class DeckCardController extends Controller
      *     )
      * )
      */
-    public function index() {
-        return DeckCardDTO::collection(DecksCard::all());
+    public function index(Request $request) {
+    $deckId = $request->query('deck_id');
+
+    if ($deckId) {
+        $cards = DecksCard::where('deck_id', $deckId)->get();
+    } else {
+        $cards = DecksCard::all();
     }
+
+    return DeckCardDTO::collection($cards);
+}
+
 
     /**
      * @OA\Post(
@@ -148,4 +157,29 @@ class DeckCardController extends Controller
         $deckCard->delete();
         return response()->noContent();
     }
+
+
+    /**
+ * @OA\Delete(
+ *     path="/api/v2/deckCards/byDeck/{deck_id}",
+ *     tags={"deckCards"},
+ *     summary="Eliminar todas las cartas de un mazo",
+ *     security={{"BearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="deck_id",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(
+ *         response=204,
+ *         description="Cartas eliminadas"
+ *     )
+ * )
+ */
+public function destroyByDeck($deck_id) {
+    DecksCard::where('deck_id', $deck_id)->delete();
+    return response()->noContent();
+}
+
 }

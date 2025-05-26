@@ -19,29 +19,27 @@ class UserCardController extends Controller
      * @OA\Get(
      *     path="/api/v2/userCards",
      *     tags={"userCards"},
-     *     summary="Listar todas las cartas de usuario",
+     *     summary="Listar todas las cartas del usuario autenticado",
      * security={{"BearerAuth":{}}},
      *     @OA\Response(
      *         response=200,
-     *         description="Lista de cartas de usuario"
+     *         description="Lista de cartas del usuario"
      *     )
      * )
      */
     public function index() {
-        return UserCardDTO::collection(UserCard::all());
+        return UserCardDTO::collection(UserCard::where('user_id', auth()->id())->get());
     }
 
     /**
      * @OA\Post(
      *     path="/api/v2/userCards",
      *     tags={"userCards"},
-     *     summary="Crear una carta de usuario",
-     * security={{"BearerAuth":{}}},
+     *     summary="Crear una carta para el usuario autenticado",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"user_id", "card_version_id", "quantity"},
-     *             @OA\Property(property="user_id", type="integer", example=1),
+     *             required={"card_version_id", "quantity"},
      *             @OA\Property(property="card_version_id", type="integer", example=5),
      *             @OA\Property(property="quantity", type="integer", example=3)
      *         )
@@ -53,19 +51,22 @@ class UserCardController extends Controller
      * )
      */
     public function store(Request $request) {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
+        $validated = $request->validate([
             'card_version_id' => 'required|exists:cards_versions,id',
             'quantity' => 'required|integer|min:0'
         ]);
-        return new UserCardDTO(UserCard::create($request->all()));
+        $userCard = new UserCard($validated);
+        $userCard->user_id = auth()->id();
+        $userCard->save();
+
+        return new UserCardDTO($userCard);
     }
 
     /**
      * @OA\Get(
      *     path="/api/v2/userCards/{id}",
      *     tags={"userCards"},
-     *     summary="Obtener una carta de usuario por ID",
+     *     summary="Obtener una carta específica del usuario autenticado",
      * security={{"BearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -85,7 +86,7 @@ class UserCardController extends Controller
      * )
      */
     public function show($id) {
-        $userCard = UserCard::findOrFail($id);
+        $userCard = UserCard::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         return new UserCardDTO($userCard);
     }
 
@@ -93,7 +94,7 @@ class UserCardController extends Controller
      * @OA\Put(
      *     path="/api/v2/userCards/{id}",
      *     tags={"userCards"},
-     *     summary="Actualizar una carta de usuario",
+     *     summary="Actualizar una carta del usuario autenticado",
      * security={{"BearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -114,9 +115,12 @@ class UserCardController extends Controller
      *     )
      * )
      */
-    public function update(Request $request,  $id) {
-        $userCard = UserCard::findOrFail($id);
-        $userCard->update($request->all());
+    public function update(Request $request, $id) {
+        $userCard = UserCard::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $validated = $request->validate([
+            'quantity' => 'sometimes|integer|min:0'
+        ]);
+        $userCard->update($validated);
         return new UserCardDTO($userCard);
     }
 
@@ -124,7 +128,7 @@ class UserCardController extends Controller
      * @OA\Delete(
      *     path="/api/v2/userCards/{id}",
      *     tags={"userCards"},
-     *     summary="Eliminar una carta de usuario",
+     *     summary="Eliminar una carta del usuario autenticado",
      * security={{"BearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -140,7 +144,7 @@ class UserCardController extends Controller
      * )
      */
     public function destroy($id) {
-        $userCard = UserCard::findOrFail($id);
+        $userCard = UserCard::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         $userCard->delete();
         return response()->noContent();
     }

@@ -12,7 +12,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     type="object",
  *     @OA\Property(property="id", type="integer"),
  *     @OA\Property(property="user_id", type="integer"),
- *     @OA\Property(property="leader_card_version_id", type="integer"),
+ *     @OA\Property(property="wins", type="integer"),
+ *     @OA\Property(property="losses", type="integer"),
  *     @OA\Property(property="name", type="string")
  * )
  */
@@ -23,8 +24,9 @@ class DeckDTO extends JsonResource
         return [
             'id'                     => $this->id,
             'user_id'                => $this->user_id,
-            'leader_card_version_id' => $this->leader_card_version_id,
             'name'                   => $this->name,
+            'wins' =>$this->wins,
+            'losses' =>$this->losses,
         ];
     }
 }

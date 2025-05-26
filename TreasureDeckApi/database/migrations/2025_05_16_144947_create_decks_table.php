@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('decks', function (Blueprint $table) {
             $table->id()->autoIncrement();
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('leader_card_version_id');
             $table->foreign('user_id')->references('id')
                 ->on('users');
             $table->string('name');
-            $table->foreign('leader_card_version_id')->references('id')
-                ->on('cards_versions');
+            $table->integer('wins');
+            $table->integer('losses');
+            
         });
     }
 

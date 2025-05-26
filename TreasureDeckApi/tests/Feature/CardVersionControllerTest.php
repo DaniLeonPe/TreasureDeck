@@ -16,7 +16,6 @@ class CardVersionControllerTest extends TestCase
         CardsVersion::factory()->count(3)->create();
 
         $response = $this->getJson('/api/v2/cardsVersion');
-
         $response->assertStatus(200)
                  ->assertJsonCount(3, 'data');
     }

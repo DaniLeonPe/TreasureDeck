@@ -29,9 +29,37 @@ class CardVersionController extends Controller
      *     )
      * )
      */
-    public function index() {
-        return CardVersionDTO::collection(CardsVersion::all());
+  public function index(Request $request)
+{
+    $limit = $request->query('limit', 20);
+    $nameFilter = $request->query('name');
+    $ids = $request->query('ids'); // leer el parámetro ids
+
+    $query = CardsVersion::query();
+
+    if ($ids) {
+        $idsArray = explode(',', $ids);
+        $query->whereIn('id', $idsArray);
     }
+
+    if ($nameFilter) {
+        $query->whereHas('card', function ($q) use ($nameFilter) {
+            $q->where('name', 'like', "%$nameFilter%");
+        });
+    }
+
+    $cards = $query->orderBy('id')->paginate($limit);
+
+    return CardVersionDTO::collection($cards);
+}
+
+
+
+
+
+
+
+
 
     /**
      * @OA\Post(

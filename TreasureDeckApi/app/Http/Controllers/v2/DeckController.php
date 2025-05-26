@@ -19,7 +19,7 @@ class DeckController extends Controller
      * @OA\Get(
      *     path="/api/v2/decks",
      *     tags={"decks"},
-     *     summary="Obtener todos los mazos",
+     *     summary="Obtener todos los mazos del usuario",
      * security={{"BearerAuth":{}}},
      *     @OA\Response(
      *         response=200,
@@ -28,7 +28,8 @@ class DeckController extends Controller
      * )
      */
     public function index() {
-        return DeckDTO::collection(Deck::all());
+       return DeckDTO::collection(Deck::where('user_id', auth()->id())->get());
+
     }
 
     /**
@@ -39,9 +40,7 @@ class DeckController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"user_id", "leader_card_version_id", "name"},
-     *             @OA\Property(property="user_id", type="integer", example=1),
-     *             @OA\Property(property="leader_card_version_id", type="integer", example=5),
+     *             required={"user_id", "name"},
      *             @OA\Property(property="name", type="string", example="Mazo Dragón")
      *         )
      *     ),
@@ -52,12 +51,19 @@ class DeckController extends Controller
      * )
      */
     public function store(Request $request) {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'leader_card_version_id' => 'required|exists:cards_versions,id',
-            'name' => 'required|string'
-        ]);
-        return new DeckDTO(Deck::create($request->all()));
+        $validated = $request->validate([
+    'name' => 'required|string'
+    
+]);
+
+$deck = new Deck($validated);
+$deck->user_id = auth()->id();
+$deck->wins = 0;
+$deck->losses = 0;
+$deck->save();
+
+return new DeckDTO($deck);
+
     }
 
     /**
@@ -84,8 +90,9 @@ class DeckController extends Controller
      * )
      */
     public function show($id) {
-        $deck = Deck::findOrFail($id);
-        return new DeckDTO($deck);
+        $deck = Deck::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+return new DeckDTO($deck);
+
     }
 
     /**
@@ -114,9 +121,8 @@ class DeckController extends Controller
      * )
      */
     public function update(Request $request,$id) {
-        $deck = Deck::findOrFail($id);
+$deck = Deck::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
          $validated = $request->validate([
-            'leader_card_version_id' => 'sometimes|exists:cards_versions,id',
             'name' => 'sometimes|string'
         ]);
         $deck->update($validated);
@@ -144,8 +150,9 @@ class DeckController extends Controller
      * )
      */
     public function destroy($id) {
-        $deck = Deck::findOrFail($id);
-        $deck->delete();
-        return response()->noContent();
+        $deck = Deck::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+$deck->delete();
+return response()->noContent();
+
     }
 }
