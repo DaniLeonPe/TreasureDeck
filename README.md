@@ -59,3 +59,28 @@ Esta app está desarrollada con **React Native** para el front-end y **PHP (Lara
    ```bash
    git clone https://github.com/tu_usuario/onepiece-tcg-collection.git
    cd onepiece-tcg-collection/backend
+
+
+### Test 
+
+Con una cobertura de 88.21%
+
+![test](img/test.png)
+
+
+### diagrama 
+
+
+## Entidad relacion 
+
+![Diagrama](img/diagrama.png)
+
+## casos de uso
+
+![CasosDeUso](img/diagrama2.png)
+
+
+## Defensa del proyecto
+
+[Defensa](https://www.canva.com/design/DAGojaIwPD4/-oMu_RQHWENacPDTirF09g/edit?utm_content=DAGojaIwPD4&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+
